@@ -339,25 +339,28 @@ class Grd2Shp:
             ncvar.standard_name = self.grd[index][self.var[index]].standard_name
             ncvar.description = self.grd[index][self.var[index]].description
             # ncvar.grid_mapping = 'crs'
-            
+            ncvar.units = self.grd[index][self.var[index]].units
             if tvar in ['tmax', 'tmin']:
                 if punits == 1:
                     conv = units.degC
+                    ncvar[:,:] = units.Quantity(self._np_var[index, 0:self.current_time_index, :], ncvar.units).to(conv).magnitude
                     ncvar.units = conv.format_babel()
-                    ncvar[:,:] = (self._np_var[index, 0:self.current_time_index, :], units.kelvin).to(conv).magnitude
                 else:
                     conv = units.degF
+                    # ncvar[:,:] = ((self._np_var[index, 0:self.current_time_index, :]-273.15)*1.8)+32.0
+                    ncvar[:,:] = units.Quantity(self._np_var[index, 0:self.current_time_index, :], ncvar.units).to(conv).magnitude
                     ncvar.units = conv.format_babel()
-                    ncvar[:,:] = ((self._np_var[index, 0:self.current_time_index, :]-273.15)*1.8)+32.0
             elif tvar == 'prcp':
-                if punits == 0:
-                    conv = (1.0 * units.mm).to(units.inch)
+                if punits == 1:
+                    conv = units('mm')
+                    ncvar[:,:] = units.Quantity(self._np_var[index, 0:self.current_time_index, :], ncvar.units).to(conv).magnitude
                     ncvar.units = conv.units.format_babel()
                 else:
-                    conv = 1.0
-                    ncvar.units = units.inch.format_babel()
+                    conv = units('inch')
+                    ncvar[:,:] = units.Quantity(self._np_var[index, 0:self.current_time_index, :], ncvar.units).to(conv).magnitude
+                    ncvar.units = conv.units.format_babel()
                 # else units are already  in mm
-                ncvar[:,:] = np.multiply(self._np_var[index, 0:self.current_time_index, :], conv.magnitude)
+                # ncvar[:,:] = np.multiply(self._np_var[index, 0:self.current_time_index, :], conv.magnitude)
             else:
                 ncvar[:,:] = self._np_var[index, 0:self.current_time_index, :]
                 ncvar.units = self.grd[index][self.var[index]].units
