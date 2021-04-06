@@ -7,7 +7,6 @@ import sys
 import netCDF4
 from typing import List
 import xarray
-import geopandas
 import datetime
 import metpy.calc as mpcalc
 from metpy.units import units
@@ -84,48 +83,20 @@ class Grd2Shp:
         self.current_time_index = None
 
     def initialize(self, 
-        grd: list[xarray.Dataset], 
-        shp: geopandas.GeoDataFrame, 
+        grd, 
+        shp, 
         wght_file: 'csv file',
         time_var: str, 
         lat_var: str,
         lon_var: str,
-        var: list[str],
-        var_output: list[str],
+        var,
+        var_output,
         opath: str,
         fileprefix: str = '',
         calctype: int = 0, 
         ):
-        """[summary]
-
-        Args:
-            grd (list[xarray.Dataset]): [description]
-            shp (geopandas.GeoDataFrame): [description]
-            wght_file (csv file): [description]
-            time_var (str): [description]
-            lat_var (str): [description]
-            lon_var (str): [description]
-            var (list[str]): [description]
-            var_output (list[str]): [description]
-            opath (str): [description]
-            fileprefix (str, optional): [description]. Defaults to ''.
-            calctype (int, optional): [description]. Defaults to 0.
-
-        Raises:
-            ValueError: [description]
-            ValueError: [description]
-            ValueError: [description]
-            ValueError: [description]
-            ValueError: [description]
-            ValueError: [description]
-            ValueError: [description]
-            ValueError: [description]
-            ValueError: [description]
-            ValueError: [description]
-            ve: [description]
-            IOError: [description]
-            IOError: [description]
-        """
+        
+        
         if not isinstance(grd, list):
             raise ValueError(f'grd: {type(grd)} must be a list[xarray.Dataset]')
         else:

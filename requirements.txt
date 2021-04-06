@@ -3,12 +3,15 @@ pandas
 geopandas
 descartes
 xarray
-dask
 numpy
 rasterio
 rasterstats
-geojson
 shapely
+geojson
+netcdf4
+metpy
 rioxarray
+pygeos
+
 
 
