@@ -5,14 +5,15 @@ import numpy as np
 from pathlib import Path
 import sys
 import netCDF4
-from typing import List
 import datetime
 import metpy.calc as mpcalc
 from metpy.units import units
 
+
 # prsr = 101.3 * (((293.0-0.0065*Hru_elev_meters(i))/293.0)**5.26)
 def std_pres(elev):
     return 101.325 * (((293.0-0.0065*elev)/293.0)**5.26)
+
 
 def getaverage(data, wghts):
     try:
@@ -22,7 +23,7 @@ def getaverage(data, wghts):
     return v_ave
 
 
-def np_get_wval(ndata, wghts, hru_id=0, verbose=False):    
+def np_get_wval(ndata, wghts, hru_id=0, verbose=False):
     """
     [Returns weighted average of ndata with weights]
 
@@ -57,7 +58,7 @@ class Grd2Shp:
         self.shp = None
         self.grd = None
         self.calctype = {
-            0: "area-weighted average", 
+            0: "area-weighted average",
             1: "zonal average"
             }
         self.type = None
@@ -81,35 +82,34 @@ class Grd2Shp:
         self.current_time = None
         self.current_time_index = None
 
-    def initialize(self, 
-        grd, 
-        shp, 
-        wght_file: 'csv file',
-        time_var: str, 
-        lat_var: str,
-        lon_var: str,
-        var,
-        var_output,
-        opath: str,
-        fileprefix: str = '',
-        calctype: int = 0, 
-        ):
-        
-        
+    def initialize(self,
+                   grd,
+                   shp,
+                   wght_file,
+                   time_var: str,
+                   lat_var: str,
+                   lon_var: str,
+                   var,
+                   var_output,
+                   opath: str,
+                   fileprefix: str = '',
+                   calctype: int = 0,
+                   ):
+
         if not isinstance(grd, list):
             raise ValueError(f'grd: {type(grd)} must be a list[xarray.Dataset]')
         else:
             for item in grd:
                 if not isinstance(item, xr.Dataset):
-                    raise ValueError(f'Item {type(item)} - arg: grd must be an xarray.Dataset')   
+                    raise ValueError(f'Item {type(item)} - arg: grd must be an xarray.Dataset')
         self.grd = grd
 
         if not isinstance(shp, gpd.GeoDataFrame):
             raise ValueError(
                 f'shp: {shp} must be a Geopandas Datafram')
         self.shp = shp
-        stringdict = {'time_var':time_var, 'lat_var':lat_var, 
-                        'lon_var':lon_var, 'fileprefix':fileprefix}
+        stringdict = {'time_var': time_var, 'lat_var': lat_var,
+                      'lon_var': lon_var, 'fileprefix': fileprefix}
         for key, value in stringdict.items():
             if not isinstance(value, str):
                 raise ValueError(f'arguement: {key}:{value} must be a string')
@@ -117,7 +117,7 @@ class Grd2Shp:
         self.lat_var = lat_var
         self.lon_var = lon_var
         self.fileprefix = fileprefix
-        
+
         if not isinstance(var, list):
             raise ValueError(f'Arguement var:{var} must be a list of strings.  Enclose in []')
         if not len(grd) == len(var):
@@ -138,7 +138,7 @@ class Grd2Shp:
 
         self.opath = Path(opath)
         if self.opath.exists():
-            print(f'output path exists', flush=True)
+            print('output path exists', flush=True)
         else:
             sys.exit(f'Output Path does not exist: {self.opath} - EXITING')
 
@@ -159,7 +159,7 @@ class Grd2Shp:
             self.gdf.reset_index(drop=True, inplace=True)
         except IOError as ie:
             raise IOError(f'Geometry File error: {ie}')
-                
+
         # grab the geom_id from the weights file and use as identifier below
         self.wght_id = self.wght_file.columns[1]
 
@@ -186,10 +186,9 @@ class Grd2Shp:
 
     def run_weights(self):
 
-        
         for index, tvar in enumerate(self.var):
             grid = self.grd[index]
-            
+
             timestep = self.current_time_index
             print(f'Processing timestep: {timestep}', flush=True)
 
@@ -210,7 +209,7 @@ class Grd2Shp:
                     val_interp[i] = netCDF4.default_fillvals['f8']
 
                 if i % 10000 == 0:
-                        print(f'    Processing {tvar} for hru {i}', flush=True)
+                    print(f'    Processing {tvar} for hru {i}', flush=True)
 
             self._np_var[index, timestep, :] = val_interp[:]
 
@@ -224,7 +223,7 @@ class Grd2Shp:
     @property
     def end_date(self):
         return self._end_date
-    
+
     @property
     def current_date(self):
         return self.current_date
@@ -240,9 +239,11 @@ class Grd2Shp:
     def write_file(self, elev_file, punits=0, filename=None, append=False):
         if not append:
             ncfile = netCDF4.Dataset(
-                self.opath / (self.fileprefix + 'climate_' + str(datetime.datetime.now().strftime('%Y%m%d')) + '.nc'),
+                self.opath / (self.fileprefix + 'climate_' + str(datetime.datetime.now().strftime('%Y%m%d'))
+                              + '.nc'),
                 mode='w', format='NETCDF4_CLASSIC'
             )
+
             def getxy(pt):
                 return pt.x, pt.y
 
@@ -254,11 +255,11 @@ class Grd2Shp:
             ncfile.featureType = 'timeSeries'
             ncfile.history = ''
 
-            sp_dim = len(self.gdf1.index)
+            # sp_dim = len(self.gdf1.index)
             # Create dimensions
 
-            geom_dim = ncfile.createDimension('geomid', size=sp_dim)  # hru_id
-            time_dim = ncfile.createDimension('time', size=None)  # unlimited axis (can be appended to).
+            # geom_dim = ncfile.createDimension('geomid', size=sp_dim)  # hru_id
+            # time_dim = ncfile.createDimension('time', size=None)  # unlimited axis (can be appended to).
 
             # Create Variables
             time = ncfile.createVariable('time', 'f4', ('time',))
@@ -297,7 +298,8 @@ class Grd2Shp:
 
         else:
             ncfile = netCDF4.Dataset(
-                self.opath / (self.fileprefix + 'climate_' + str(datetime.datetime.now().strftime('%Y%m%d')) + '.nc'),
+                self.opath / (self.fileprefix + 'climate_' + str(datetime.datetime.now().strftime('%Y%m%d'))
+                              + '.nc'),
                 mode='a', format='NETCDF_CLASSIC'
             )
 
@@ -313,28 +315,28 @@ class Grd2Shp:
             if tvar in ['tmax', 'tmin']:
                 if punits == 1:
                     conv = units.degC
-                    ncvar[:,:] = units.Quantity(self._np_var[index, 0:self.current_time_index, :], ncvar.units).to(conv).magnitude
+                    ncvar[:, :] = units.Quantity(self._np_var[index, 0:self.current_time_index, :], ncvar.units).to(conv).magnitude
                     ncvar.units = conv.format_babel()
                 else:
                     conv = units.degF
                     # ncvar[:,:] = ((self._np_var[index, 0:self.current_time_index, :]-273.15)*1.8)+32.0
-                    ncvar[:,:] = units.Quantity(self._np_var[index, 0:self.current_time_index, :], ncvar.units).to(conv).magnitude
+                    ncvar[:, :] = units.Quantity(self._np_var[index, 0:self.current_time_index, :], ncvar.units).to(conv).magnitude
                     ncvar.units = conv.format_babel()
             elif tvar == 'prcp':
                 if punits == 1:
                     conv = units('mm')
-                    ncvar[:,:] = units.Quantity(self._np_var[index, 0:self.current_time_index, :], ncvar.units).to(conv).magnitude
+                    ncvar[:, :] = units.Quantity(self._np_var[index, 0:self.current_time_index, :], ncvar.units).to(conv).magnitude
                     ncvar.units = conv.units.format_babel()
                 else:
                     conv = units('inch')
-                    ncvar[:,:] = units.Quantity(self._np_var[index, 0:self.current_time_index, :], ncvar.units).to(conv).magnitude
+                    ncvar[:, :] = units.Quantity(self._np_var[index, 0:self.current_time_index, :], ncvar.units).to(conv).magnitude
                     ncvar.units = conv.units.format_babel()
                 # else units are already  in mm
                 # ncvar[:,:] = np.multiply(self._np_var[index, 0:self.current_time_index, :], conv.magnitude)
             else:
-                ncvar[:,:] = self._np_var[index, 0:self.current_time_index, :]
+                ncvar[:, :] = self._np_var[index, 0:self.current_time_index, :]
                 ncvar.units = self.grd[index][self.var[index]].units
-            
+
         elevf = gpd.read_file(elev_file, layer='hru_elev')
         elev = elevf['hru_elev'].values
 
@@ -354,15 +356,11 @@ class Grd2Shp:
                 spch = units.Quantity(self._np_var[shum_ind, i, j], "kg/kg")
                 rhmax = mpcalc.relative_humidity_from_specific_humidity(pr, tmax, spch)
                 rhmin = mpcalc.relative_humidity_from_specific_humidity(pr, tmin, spch)
-                rel_h[i,j] = (rhmin.magnitude + rhmax.magnitude)/2.0
+                rel_h[i, j] = (rhmin.magnitude + rhmax.magnitude)/2.0
 
         ncvar = ncfile.createVariable('humidity', rel_h.dtype, ('time', 'geomid'))
         ncvar.units = "1"
         ncvar.fill_value = netCDF4.default_fillvals['f8']
-        ncvar[:,:] = rel_h[0:self.current_time_index,:]
-
+        ncvar[:, :] = rel_h[0:self.current_time_index, :]
 
         ncfile.close()
-
-
-        
