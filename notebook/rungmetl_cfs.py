@@ -3,6 +3,8 @@ import grd2shp
 import xarray as xr
 import geopandas as gpd
 import argparse
+from pathlib import Path
+import sys
 
 def valid_path(s):
     if Path(s).exists():
@@ -24,22 +26,23 @@ def parser():
                         help='extraction method: (median) or (enseble)', metavar='extraction type',
                         default='median', required=False, choices=['median', 'ensemble'])
 
-    my_parser.add_argument('-s', --'shape_file', type=valid_file,
+    my_parser.add_argument('-s', '--shape_file', type=valid_file,
                         help='path/file.shp - path to shapefile', metavar='path/shapefile.shp',
                         default=None, required=True)
 
-    my_parser.add_argument('-w', '-weights_file', type=valid_file, 
+    my_parser.add_argument('-w', '--weights_file', type=valid_file, 
                         help='path/weights.csv - path to weights file', metavar='path/weights.csv',
                         default=None, required=True)
 
-    my_parser.add_argument('-0', '-outpath', type=valid_path, 
+    my_parser.add_argument('-o', '--outpath', type=valid_path, 
                         help='Output path (location of netcdf output files)', metavar='output_path',
                         default=None, required=True)
 
-    my_parser.add_argument('-e', '-elev_file', type=valid_file, 
+    my_parser.add_argument('-e', '--elev_file', type=valid_file, 
                         help='path/elev.gpkg - path to elevation file, used to convert specific humidity to relative humidity',
                          metavar='path/elev.gpkg',
                         default=None, required=True)
+    return my_parser
 
 def args(parser):
     return parser.parse_args()
@@ -48,7 +51,7 @@ def main():
     my_parser = parser()
     my_args = args(my_parser)
 
-    if my_args.tyep_extact == 'median':
+    if my_args.type_extract == 'median':
         etype = 0
     else:
         etype = 1
@@ -93,3 +96,5 @@ def main():
 
     g2s.write_file(elev_file=elevf, punits=1)
                 
+if __name__ == "__main__":
+    sys.exit(main())

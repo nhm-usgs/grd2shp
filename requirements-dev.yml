@@ -6,17 +6,10 @@ dependencies:
 # List required packages in this file, one per line.
  - pandas
  - geopandas
- - descartes
  - xarray
- - dask
  - numpy
- - rasterio
- - rasterstats
- - shapely
  - jupyterlab
  - matplotlib
- - geojson
  - netcdf4
  - metpy
- - matplotlib
- - rioxarray
+ 

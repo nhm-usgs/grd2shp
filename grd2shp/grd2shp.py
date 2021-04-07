@@ -6,7 +6,6 @@ from pathlib import Path
 import sys
 import netCDF4
 from typing import List
-import xarray
 import datetime
 import metpy.calc as mpcalc
 from metpy.units import units
