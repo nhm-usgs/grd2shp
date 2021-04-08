@@ -255,11 +255,11 @@ class Grd2Shp:
             ncfile.featureType = 'timeSeries'
             ncfile.history = ''
 
-            # sp_dim = len(self.gdf1.index)
+            sp_dim = len(self.gdf1.index)
             # Create dimensions
 
-            # geom_dim = ncfile.createDimension('geomid', size=sp_dim)  # hru_id
-            # time_dim = ncfile.createDimension('time', size=None)  # unlimited axis (can be appended to).
+            ncfile.createDimension('geomid', size=sp_dim)  # hru_id
+            ncfile.createDimension('time', size=None)  # unlimited axis (can be appended to).
 
             # Create Variables
             time = ncfile.createVariable('time', 'f4', ('time',))
