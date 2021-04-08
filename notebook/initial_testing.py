@@ -27,7 +27,8 @@ pin = g2.initialize(
     grd=[ds1, ds2, ds3, ds4, ds5, ds6],
     calctype=0,
     shp=gdf,
-    wght_file=r'C:/Users/rmcd/OneDrive - DOI/GitRepos/onhm-fetcher-parser/Data_v1_1/tmp_Gridmet_weights_hru_v1_1e_test.csv',
+    wght_file=r'C:/Users/rmcd/OneDrive - DOI/GitRepos/onhm-fetcher-parser/Data_v1_1/' +
+              'tmp_Gridmet_weights_hru_v1_1e_test.csv',
     time_var='day',
     lat_var='lat',
     lon_var='lon',

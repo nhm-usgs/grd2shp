@@ -315,21 +315,25 @@ class Grd2Shp:
             if tvar in ['tmax', 'tmin']:
                 if punits == 1:
                     conv = units.degC
-                    ncvar[:, :] = units.Quantity(self._np_var[index, 0:self.current_time_index, :], ncvar.units).to(conv).magnitude
+                    ncvar[:, :] = units.Quantity(self._np_var[index, 0:self.current_time_index, :], ncvar.units)\
+                        .to(conv).magnitude
                     ncvar.units = conv.format_babel()
                 else:
                     conv = units.degF
                     # ncvar[:,:] = ((self._np_var[index, 0:self.current_time_index, :]-273.15)*1.8)+32.0
-                    ncvar[:, :] = units.Quantity(self._np_var[index, 0:self.current_time_index, :], ncvar.units).to(conv).magnitude
+                    ncvar[:, :] = units.Quantity(self._np_var[index, 0:self.current_time_index, :], ncvar.units)\
+                        .to(conv).magnitude
                     ncvar.units = conv.format_babel()
             elif tvar == 'prcp':
                 if punits == 1:
                     conv = units('mm')
-                    ncvar[:, :] = units.Quantity(self._np_var[index, 0:self.current_time_index, :], ncvar.units).to(conv).magnitude
+                    ncvar[:, :] = units.Quantity(self._np_var[index, 0:self.current_time_index, :], ncvar.units)\
+                        .to(conv).magnitude
                     ncvar.units = conv.units.format_babel()
                 else:
                     conv = units('inch')
-                    ncvar[:, :] = units.Quantity(self._np_var[index, 0:self.current_time_index, :], ncvar.units).to(conv).magnitude
+                    ncvar[:, :] = units.Quantity(self._np_var[index, 0:self.current_time_index, :], ncvar.units)\
+                        .to(conv).magnitude
                     ncvar.units = conv.units.format_babel()
                 # else units are already  in mm
                 # ncvar[:,:] = np.multiply(self._np_var[index, 0:self.current_time_index, :], conv.magnitude)

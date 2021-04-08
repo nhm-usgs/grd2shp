@@ -41,7 +41,8 @@ def parser():
                            default=None, required=True)
 
     my_parser.add_argument('-e', '--elev_file', type=valid_file,
-                           help='path/elev.gpkg - path to elevation file, used to convert specific humidity to relative humidity',
+                           help='path/elev.gpkg - path to elevation file, used to convert specific humidity ' +
+                                'to relative humidity',
                            metavar='path/elev.gpkg',
                            default=None, required=True)
     return my_parser
