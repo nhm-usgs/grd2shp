@@ -5,9 +5,9 @@ import sys
 import numpy as np
 import csv
 
+
 def read(nc_fn):
     nc_fid = Dataset(nc_fn, 'r')
-    nc_attrs = nc_fid.ncattrs()
     # print 'attrs', nc_attrs
 
     nc_dims = [dim for dim in nc_fid.dimensions]
@@ -26,7 +26,7 @@ def read(nc_fn):
 
     time_var = nc_fid.variables['time']
     # print(str(time_var))
-    dtime = num2date(time_var[:],time_var.units)
+    dtime = num2date(time_var[:], time_var.units)
     # print("dtime = " + str(dtime[0]))
 
     base_date_str = str(dtime[0])
@@ -46,13 +46,14 @@ def read(nc_fn):
 
     return var_names, base_date, nts, vals
 
+
 # dir is where to write the CBH files
 # full path required for nc_fn
 def run(dir, nc_fn):
     var_names, base_date, nts, vals = read(nc_fn)
-    
+
     # read the mapping
-    nhm_id = np.zeros(114958, dtype = np.int)
+    nhm_id = np.zeros(114958, dtype=np.int)
     ii = 0
     nhm_id_file = dir + 'nhm_id'
     with open(nhm_id_file) as csv_file:
@@ -66,7 +67,7 @@ def run(dir, nc_fn):
         v = vals[name]
         v2 = np.zeros(114958)
         nfeats = len(v[0])
-        fn2 = dir + name + "_t.cbh" # _t to separate unfilled from filled cbh file
+        fn2 = dir + name + "_t.cbh"  # _t to separate unfilled from filled cbh file
         current_date = base_date
         print('writing ' + fn2)
         with open(fn2, 'w') as fp:
@@ -95,13 +96,14 @@ def run(dir, nc_fn):
                         fp.write(' ' + '{:.1f}'.format(v2[jj]))
                     else:
                         fp.write(' ' + '{:.2f}'.format(v2[jj]))
-                        
+
                 fp.write('\n')
                 current_date += datetime.timedelta(days=1)
 
 
 def main(dir, nc_fn):
     run(dir, nc_fn)
+
 
 if __name__ == '__main__':
 
@@ -110,6 +112,6 @@ if __name__ == '__main__':
     enddate = sys.argv[2]
     end_date = datetime.datetime.strptime(enddate, "%Y-%m-%d")
 
-    nc_fn = dir + 'test_climate_'+ end_date.strftime('%Y%m%d') +'.nc'
+    nc_fn = dir + 'test_climate_' + end_date.strftime('%Y%m%d') + '.nc'
 
     main(dir, nc_fn)
