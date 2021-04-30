@@ -4,6 +4,8 @@ channels:
  - defaults
 dependencies:
 # List required packages in this file, one per line.
+ - dask
+ - bottleneck
  - pandas
  - geopandas
  - xarray

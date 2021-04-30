@@ -12,3 +12,11 @@ numpydoc
 sphinx-copybutton
 sphinx_rtd_theme
 
+dask
+bottleneck
+pandas
+geopandas
+xarray
+numpy
+netcdf4
+metpy

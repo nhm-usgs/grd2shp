@@ -6,6 +6,10 @@ from pathlib import Path
 import sys
 
 
+etype_dict = {'day0': 0, 'day1': 1, 'day2': 2, 'all': 3, 'median': 4}
+itype_dict = {'area_weighted_mean': 0, 'zonal_stats': 1}
+
+
 def valid_path(s):
     if Path(s).exists():
         return s
@@ -20,13 +24,27 @@ def valid_file(s):
         raise argparse.ArgumentError(f'File does not exist: {s}')
 
 
+def valid_etype(s):
+    if s in etype_dict.keys():
+        return s
+    else:
+        raise argparse.ArgumentError(f'Not a valid extraction type: {s}')
+
+
+def valid_interp(s):
+    if s in itype_dict.keys():
+        return s
+    else:
+        raise argparse.ArgumentError(f'Not a valid interpolation type: {s}')
+
+
 def parser():
     my_parser = argparse.ArgumentParser(prog='runGMETL_CFSv2',
                                         description='ETL for gridMET CFSv2 (NOAA)')
 
-    my_parser.add_argument('-t', '--type_extract', type=str,
+    my_parser.add_argument('-t', '--type_extract', type=valid_etype,
                            help='extraction method: (median) or (enseble)', metavar='extraction type',
-                           default='median', required=False, choices=['median', 'ensemble'])
+                           default='median', required=False, choices=['day0', 'day1', 'day2', 'all', 'median'])
 
     my_parser.add_argument('-s', '--shape_file', type=valid_file,
                            help='path/file.shp - path to shapefile', metavar='path/shapefile.shp',
@@ -45,6 +63,12 @@ def parser():
                                 'to relative humidity',
                            metavar='path/elev.gpkg',
                            default=None, required=True)
+
+    my_parser.add_argument('-i', '--interp_type', type=valid_interp,
+                           help='interpolate grid to shape using mean weighted-area or rasterio zonal stats',
+                           metavar='interpolation type',
+                           choices=['area_weighted_mean', 'zonal_stats'],
+                           default='area_weighted_mean', required=True)
     return my_parser
 
 
@@ -55,12 +79,8 @@ def args(parser):
 def main():
     my_parser = parser()
     my_args = args(my_parser)
-
-    if my_args.type_extract == 'median':
-        etype = 0
-    else:
-        etype = 1
-
+    etype = etype_dict[my_args.type_extract]
+    itype = itype_dict[my_args.interp_type]
     shpf = my_args.shape_file
     wghtf = my_args.weights_file
     elevf = my_args.elev_file
@@ -74,18 +94,18 @@ def main():
                'specific_humidity']
 
     m = gm.Gridmet(type=etype)
-    ds1 = m.tmax
-    ds2 = m.tmin
-    ds3 = m.prcp
-    ds4 = m.wind_speed
-    ds5 = m.srad
-    ds6 = m.specific_humidity
+    ds1 = m.tmax.median(dim='time', skipna=True, keep_attrs=True)
+    ds2 = m.tmin.median(dim='time', skipna=True, keep_attrs=True)
+    ds3 = m.prcp.mean(dim='time', skipna=True, keep_attrs=True)
+    ds4 = m.wind_speed.median(dim='time', skipna=True, keep_attrs=True)
+    ds5 = m.srad.median(dim='time', skipna=True, keep_attrs=True)
+    ds6 = m.specific_humidity.median(dim='time', skipna=True, keep_attrs=True)
     dat = [ds1, ds2, ds3, ds4, ds5, ds6]
     vout = ['tmax', 'tmin', 'prcp', 'ws', 'srad', 'shum']
     gdf = gpd.read_file(shpf)
     g2s = grd2shp.Grd2Shp()
     g2s.initialize(grd=dat,
-                   calctype=etype,
+                   calctype=itype,
                    shp=gdf,
                    wght_file=wghtf,
                    time_var='day',
