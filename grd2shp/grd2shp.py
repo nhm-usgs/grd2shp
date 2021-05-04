@@ -238,7 +238,7 @@ class Grd2Shp:
 
     def write_file(self, elev_file, punits=0, datetag=None, filename=None, append=False):
         if datetag == None:
-            datetag = str(datetime.datetime.now().strftime('%Y_%m_%d')
+            datetag = str(datetime.datetime.now().strftime('%Y_%m_%d'))
         if not append:
             ncfile = netCDF4.Dataset(
                 self.opath / (self.fileprefix + 'climate_' + datetag)
