@@ -241,7 +241,7 @@ class Grd2Shp:
             datetag = str(datetime.datetime.now().strftime('%Y_%m_%d'))
         if not append:
             ncfile = netCDF4.Dataset(
-                self.opath / (self.fileprefix + 'climate_' + datetag)
+                self.opath / (self.fileprefix + 'climate_' + datetag \
                               + '.nc'),
                 mode='w', format='NETCDF4_CLASSIC'
             )
