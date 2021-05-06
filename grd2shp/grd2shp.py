@@ -236,10 +236,13 @@ class Grd2Shp:
     def current_mapped_data(self):
         return self._np_var[:, self.current_time_index, :]
 
-    def write_file(self, elev_file, punits=0, filename=None, append=False):
+    def write_file(self, elev_file, punits=0, datetag=None, filename=None, append=False):
+        if datetag is None:
+            datetag = str(datetime.datetime.now().strftime('%Y_%m_%d'))
+
         if not append:
             ncfile = netCDF4.Dataset(
-                self.opath / (self.fileprefix + 'climate_' + str(datetime.datetime.now().strftime('%Y%m%d'))
+                self.opath / (self.fileprefix + 'climate_' + datetag.strftime("%Y_%m_%d")
                               + '.nc'),
                 mode='w', format='NETCDF4_CLASSIC'
             )
