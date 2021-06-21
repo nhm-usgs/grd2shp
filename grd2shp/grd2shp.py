@@ -214,7 +214,7 @@ class Grd2Shp:
             self._np_var[index, timestep, :] = val_interp[:]
 
         self.current_time_index += 1
-        self.current_time = self.grd[0][self.time_var][self.current_time_index]
+        # self.current_time = self.grd[0][self.time_var][self.current_time_index]
 
     @property
     def start_date(self):
