@@ -4,6 +4,7 @@ import geopandas as gpd
 import argparse
 from pathlib import Path
 import sys
+import datetime
 
 
 etype_dict = {'day0': 0, 'day1': 1, 'day2': 2, 'all': 3, 'median': 4}
@@ -38,6 +39,14 @@ def valid_interp(s):
         raise argparse.ArgumentError(f'Not a valid interpolation type: {s}')
 
 
+def valid_date(s):
+    try:
+        return datetime.datetime.strptime(s, "%Y-%m-%d")
+    except ValueError:
+        msg = "Not a valid date: '{0}'.".format(s)
+        raise argparse.ArgumentTypeError(msg)
+
+
 def parser():
     my_parser = argparse.ArgumentParser(prog='runGMETL_CFSv2',
                                         description='ETL for gridMET CFSv2 (NOAA)')
@@ -69,6 +78,12 @@ def parser():
                            metavar='interpolation type',
                            choices=['area_weighted_mean', 'zonal_stats'],
                            default='area_weighted_mean', required=True)
+
+    my_parser.add_argument('-d', '--date_tag', type=valid_date,
+                           help='Date tag used to identify ouputfile created by this process',
+                           metavar='Date tag',
+                           default=None, required=True)
+
     return my_parser
 
 
@@ -85,23 +100,29 @@ def main():
     wghtf = my_args.weights_file
     elevf = my_args.elev_file
     opth = my_args.outpath
-
+    datetag = my_args.date_tag
+    # all the possible vars below
+    # gm_vars = ['air_temperature',
+    #            'air_temperature',
+    #            'precipitation_amount',
+    #            'wind_speed',
+    #            'surface_downwelling_shortwave_flux_in_air',
+    #            'specific_humidity']
     gm_vars = ['air_temperature',
                'air_temperature',
                'precipitation_amount',
-               'wind_speed',
-               'surface_downwelling_shortwave_flux_in_air',
                'specific_humidity']
-
     m = gm.Gridmet(type=etype)
+    ds1 = m.tmax
     ds1 = m.tmax.median(dim='time', skipna=True, keep_attrs=True)
     ds2 = m.tmin.median(dim='time', skipna=True, keep_attrs=True)
     ds3 = m.prcp.mean(dim='time', skipna=True, keep_attrs=True)
-    ds4 = m.wind_speed.median(dim='time', skipna=True, keep_attrs=True)
-    ds5 = m.srad.median(dim='time', skipna=True, keep_attrs=True)
+    # ds4 = m.wind_speed.median(dim='time', skipna=True, keep_attrs=True)
+    # ds5 = m.srad.median(dim='time', skipna=True, keep_attrs=True)
     ds6 = m.specific_humidity.median(dim='time', skipna=True, keep_attrs=True)
-    dat = [ds1, ds2, ds3, ds4, ds5, ds6]
-    vout = ['tmax', 'tmin', 'prcp', 'ws', 'srad', 'shum']
+    dat = [ds1, ds2, ds3, ds6]
+    vout = ['tmax', 'tmin', 'prcp', 'shum']
+    
     gdf = gpd.read_file(shpf)
     g2s = grd2shp.Grd2Shp()
     g2s.initialize(grd=dat,
@@ -115,10 +136,10 @@ def main():
                    var_output=vout,
                    opath=opth,
                    fileprefix='f_')
-    for i in range(1):
+    for i in range(30):
         g2s.run_weights()
 
-    g2s.write_file(elev_file=elevf, punits=1)
+    g2s.write_file(elev_file=elevf, punits=1, datetag=datetag)
 
 
 if __name__ == "__main__":

@@ -2,3 +2,4 @@
 *.gpkg
 *.csv
 *.cbh
+cache/

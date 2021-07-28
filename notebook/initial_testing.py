@@ -1,4 +1,7 @@
+# %%
+%matplotlib inline
 import gridmet_cfsv2 as gm
+from numpy.core.numeric import True_
 import grd2shp
 import geopandas as gpd
 
@@ -6,10 +9,57 @@ import geopandas as gpd
 gm_vars = ['air_temperature',
            'air_temperature',
            'precipitation_amount',
-           'wind_speed',
-           'surface_downwelling_shortwave_flux_in_air',
            'specific_humidity']
-m = gm.Gridmet(type=0)
+m = gm.Gridmet(type=3)
+
+# %%
+ds = m.tmax
+
+# %%
+ds.load()
+
+# %%
+day_dim = ds.dims['day']
+ds.air_temperature[0:15, 0, :, :] = ds.air_temperature[32:47, 0, :, :]
+ds.air_temperature[0:15, 1, :, :] = ds.air_temperature[16:31, 1, :, :]
+ds.air_temperature[16:31, 0, :, :] = ds.air_temperature[32:47, 0, :, :]
+
+ds.air_temperature[16:31, day_dim-1, :, :] = ds.air_temperature[0:15, day_dim-1, :, :]
+ds.air_temperature[32:47, day_dim-1, :, :] = ds.air_temperature[0:15, day_dim-1, :, :]
+ds.air_temperature[32:47, day_dim-2, :, :] = ds.air_temperature[16:31, day_dim-2, :, :]
+
+
+# %%
+ds.air_temperature.isel(time=0, day=31).plot()
+# %%
+ds.air_temperature.isel(time=0, day=0).plot()
+
+# %%
+ds.air_temperature.isel(time=16, day=31).plot()
+# %%
+ds.air_temperature.isel(time=47, day=31).plot()
+# %%
+ds.air_temperature.isel(time=47, day=30).plot()
+
+# %%
+d_time = m.tmax.dims['time']
+
+# %%
+import numpy as np
+np.nanmin(m.tmax.air_temperature[3,2,:,:].values)
+
+# %%
+%matplotlib inline
+m.tmax.air_temperature.isel(time=0, day=2).plot()
+# %%
+m.tmax.air_temperature.load()
+m.tmax.air_temperature[0:15, 0, :, :] = m.tmax.air_temperature[32:47, 0, :, :]
+
+# %%
+m.tmax.air_temperature.isel(time=0, day=0).plot()
+
+
+# %%
 ds1 = m.tmax
 ds2 = m.tmin
 ds3 = m.prcp
